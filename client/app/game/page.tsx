@@ -33,7 +33,7 @@ export default function GamePage() {
 
   // Fetch a question when the game starts
   useEffect(() => {
-    fetch("http://localhost:5000/api/question")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/question`)
       .then((res) => res.json())
       .then((data) => setQuestion(data));
 
@@ -45,7 +45,7 @@ export default function GamePage() {
       setUsername(challengeUser); // Auto-fill username
 
       // Fetch the challenger's high score
-      fetch(`http://localhost:5000/api/user/${challengeUser}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${challengeUser}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.highScore !== undefined) {
@@ -72,7 +72,7 @@ export default function GamePage() {
     if (!question || !selectedOption) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/answer", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/answer`, {
         method: "POST",
         body: JSON.stringify({
           questionId: question._id,
@@ -113,7 +113,7 @@ export default function GamePage() {
     if (!username) return;
 
     try {
-      await fetch("http://localhost:5000/api/user", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
         method: "POST",
         body: JSON.stringify({ username, highScore: score }),
         headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ export default function GamePage() {
     setGameState("playing");
     setAnswerData(null);
 
-    const res = await fetch("http://localhost:5000/api/question");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/question`);
     const newQuestion = await res.json();
     setQuestion(newQuestion);
   };
@@ -148,7 +148,7 @@ export default function GamePage() {
     setGameState("playing");
     setAnswerData(null);
 
-    const res = await fetch("http://localhost:5000/api/question");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/question`);
     const newQuestion = await res.json();
     setQuestion(newQuestion);
   };
