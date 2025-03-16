@@ -1,6 +1,5 @@
 "use client";
-import { useState, useEffect, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Modal from "../components/modal";
 
 type Question = {
@@ -16,9 +15,7 @@ type AnswerResponse = {
 };
 
 export default function GamePage() {
-  const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
-  const [isCheckingUser, setIsCheckingUser] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [gameState, setGameState] = useState<
@@ -27,7 +24,6 @@ export default function GamePage() {
   const [answerData, setAnswerData] = useState<AnswerResponse | null>(null);
   const [lives, setLives] = useState(5);
   const [score, setScore] = useState(0);
-  const [isPending, startTransition] = useTransition();
   const [modalStage, setModalStage] = useState<
     "instructions" | "username" | "none"
   >("instructions");
@@ -72,10 +68,10 @@ export default function GamePage() {
   };
 
   // Handle answer submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!question || !selectedOption) return;
 
-    startTransition(async () => {
+    try {
       const res = await fetch("http://localhost:5000/api/answer", {
         method: "POST",
         body: JSON.stringify({
@@ -107,7 +103,9 @@ export default function GamePage() {
           return updatedLives; // Ensure state updates correctly
         });
       }
-    });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+    }
   };
 
   // Handle game over and update high score
@@ -256,7 +254,7 @@ export default function GamePage() {
             <div className="mt-6">
               {didWinChallenge === true ? (
                 <p className="text-green-400 text-xl font-bold">
-                  🎉 You beat {challenger}'s score of {challengerScore}!
+                  🎉 You beat {challenger}&apos;s score of {challengerScore}!
                 </p>
               ) : (
                 <p className="text-red-400 text-xl font-bold">
@@ -289,9 +287,9 @@ export default function GamePage() {
           <div className="p-6 text-center max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-4">Welcome to the Game!</h2>
             <p className="text-gray-700 mb-4">
-              You'll be given clues to guess the correct city. Select an option
-              and submit your answer. You have 5 hearts—wrong answers cost a
-              life!
+              You&apos;ll be given clues to guess the correct city. Select an
+              option and submit your answer. You have 5 hearts—wrong answers
+              cost a life!
             </p>
             <button
               onClick={handleInstructionsClose}
