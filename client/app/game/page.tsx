@@ -31,6 +31,9 @@ export default function GamePage() {
   const [modalStage, setModalStage] = useState<
     "instructions" | "username" | "none"
   >("instructions");
+  const [challenger, setChallenger] = useState<string | null>(null);
+  const [challengerScore, setChallengerScore] = useState<number | null>(null);
+  const [didWinChallenge, setDidWinChallenge] = useState<boolean | null>(null);
 
   // Fetch a question when the game starts
   useEffect(() => {
@@ -42,7 +45,18 @@ export default function GamePage() {
     const challengeUser = urlParams.get("challenge");
 
     if (challengeUser) {
-      setUsername(challengeUser);
+      setChallenger(challengeUser);
+      setUsername(challengeUser); // Auto-fill username
+
+      // Fetch the challenger's high score
+      fetch(`http://localhost:5000/api/user/${challengeUser}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.highScore !== undefined) {
+            setChallengerScore(data.highScore);
+          }
+        })
+        .catch(() => setChallengerScore(null));
     }
   }, []);
 
@@ -106,6 +120,11 @@ export default function GamePage() {
         body: JSON.stringify({ username, highScore: score }),
         headers: { "Content-Type": "application/json" },
       });
+
+      // Determine if the user won the challenge
+      if (challengerScore !== null) {
+        setDidWinChallenge(score > challengerScore);
+      }
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -232,6 +251,21 @@ export default function GamePage() {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white text-center">
           <h2 className="text-5xl font-bold">🎮 Game Over!</h2>
           <p className="text-2xl mt-4">Final Score: {score} points</p>
+
+          {challenger && challengerScore !== null && (
+            <div className="mt-6">
+              {didWinChallenge === true ? (
+                <p className="text-green-400 text-xl font-bold">
+                  🎉 You beat {challenger}'s score of {challengerScore}!
+                </p>
+              ) : (
+                <p className="text-red-400 text-xl font-bold">
+                  ❌ {challenger} scored {challengerScore}. Try again!
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 flex flex-col gap-4">
             <button
               className="bg-yellow-500 text-black px-6 py-2 rounded text-lg font-bold"
