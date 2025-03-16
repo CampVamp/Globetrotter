@@ -3,6 +3,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 import "dotenv/config";
+import router from "./api";
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(morgan(morganFormat));
 app.use(express.json());
 
 // Routes
-// app.use("/api", router);
+app.use("/api", router);
 
 // Default route
 app.get("/", (req: Request, res: Response) => {
